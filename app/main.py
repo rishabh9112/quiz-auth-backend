@@ -9,8 +9,9 @@ app = FastAPI()
 
 origins = [
     "http://localhost:5173",
-    "https://*.lovable.app",
+    "https://quiz-frontend-kids.vercel.app",
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
