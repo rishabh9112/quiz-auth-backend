@@ -9,3 +9,4 @@ passlib[bcrypt]
 python-jose[cryptography]
 email-validator
 gunicorn
+argon2_cffi
