@@ -87,3 +87,31 @@ def change_password(
 @router.get("/google/login")
 async def google_login(request: Request):
     return await oauth.google.authorize_redirect(request,settings.GOOGLE_REDIRECT_URI)
+
+@router.get("/google/callback")
+async def google_callback(request: Request):
+    token = await oauth.google.authorize_access_token(request)
+    user_info = token["userinfo"]
+
+    email = user_info["email"]
+    full_name = user_info.get("name", "Google User")
+
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        user = User(
+            full_name=full_name,
+            email=email,
+            hashed_password="GOOGLE_OAUTH",
+            is_verified=True
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    access, refresh = generate_tokens(user.id)
+
+    return RedirectResponse(
+        f"{settings.FRONTEND_URL}/oauth-success?token={access}"
+    )
