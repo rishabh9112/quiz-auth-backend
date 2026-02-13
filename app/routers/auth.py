@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.dependencies import get_db, get_current_user
 from app.schemas.auth import *
@@ -6,8 +6,15 @@ from app.schemas.user import UserResponse
 from app.services.auth_service import *
 from app.utils.hashing import verify_password, hash_password
 from app.utils.password_validator import validate_password
+from fastapi.responses import RedirectResponse
+from app.services.google_oauth import oauth
+from app.services.token_service import generate_tokens
+from app.database import SessionLocal
+from app.models.user import User
+from app.config import settings
 
 router = APIRouter(prefix="/auth")
+
 
 @router.post("/register")
 def register(data: RegisterRequest, db: Session = Depends(get_db)):
@@ -77,3 +84,6 @@ def change_password(
     db.commit()
 
     return {"message": "Password updated"}
+@router.get("/google/login")
+async def google_login(request: Request):
+    return await oauth.google.authorize_redirect(request,settings.GOOGLE_REDIRECT_URI)
