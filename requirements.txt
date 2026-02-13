@@ -12,3 +12,4 @@ gunicorn
 argon2_cffi
 authlib
 httpx
+itsdangerous
